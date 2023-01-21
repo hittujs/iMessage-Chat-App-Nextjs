@@ -1,16 +1,23 @@
-import Head from "next/head";
-import Image from "next/image";
 import { Inter } from "@next/font/google";
-import { signIn, useSession } from "next-auth/react";
+import { getSession, useSession } from "next-auth/react";
+import { NextPageContext } from "next";
+import { Box } from "@chakra-ui/react";
+import { Chat } from "@/components/Chat";
+import { Auth } from "@/components/Auth";
 
 const inter = Inter({ subsets: ["latin"] });
 
 export default function Home() {
-  const { data, status } = useSession();
+  const { data } = useSession();
+  return <Box>{data?.user ? <Chat /> : <Auth />}</Box>;
+}
 
-  return (
-    <div>
-      <button onClick={() => signIn("google")}>Sign In User</button>
-    </div>
-  );
+export async function getServerSideProps(context: NextPageContext) {
+  const session = await getSession(context);
+
+  return {
+    props: {
+      session,
+    },
+  };
 }
