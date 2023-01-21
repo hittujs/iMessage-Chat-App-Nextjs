@@ -1,3 +1,4 @@
+import { useMutation } from "@apollo/client";
 import {
   Box,
   Button,
@@ -10,6 +11,8 @@ import {
 import { Session } from "next-auth";
 import { signIn } from "next-auth/react";
 import React, { useState } from "react";
+import userOperations from "@/graphql/operations/user";
+import { CreateUsernameData, CreateUsernameVariables } from "@/utils/types";
 
 interface Props {
   session: Session | null;
@@ -19,17 +22,39 @@ interface Props {
 export const Auth: React.FC<Props> = (session, reloadSession) => {
   const [username, setUsername] = useState("");
 
+  const [createUsername, { loading, error }] = useMutation<
+    CreateUsernameData,
+    CreateUsernameVariables
+  >(userOperations.Mutations.createUsername);
+
   const onSubmit = async () => {
+    if (!username) return;
     try {
-      // create username mutation to send out username to the GraphQL API
+      const { data } = await createUsername({ variables: { username } });
+
+      if (!data?.createUsername) {
+        throw new Error();
+      }
+      if (data.createUsername.error) {
+        const {
+          createUsername: { error },
+        } = data;
+
+        throw new Error(error);
+      }
+      // Reload session to obtain new username
+      reloadSession();
     } catch (error) {
       console.log("error", error);
     }
   };
+
+  console.log(session, "session from auth");
+
   return (
     <Center height="100vh" border="1px solid red">
       <Stack align="center" spacing={8}>
-        {session ? (
+        {session.session?.user ? (
           <>
             <Text fontSize="3xl">Create a Username</Text>
             <Input
@@ -38,7 +63,9 @@ export const Auth: React.FC<Props> = (session, reloadSession) => {
               onChange={(e) => setUsername(e.target.value)}
             ></Input>
 
-            <Button width="100%">Save</Button>
+            <Button width="100%" onClick={onSubmit}>
+              Save
+            </Button>
           </>
         ) : (
           <>
@@ -49,7 +76,7 @@ export const Auth: React.FC<Props> = (session, reloadSession) => {
               variant={"ghost"}
               onClick={() => signIn("google")}
             >
-              Continue with google{" "}
+              Continue with google
             </Button>
           </>
         )}
