@@ -19,7 +19,7 @@ export interface SearchUsersData {
   searchUsers: Array<SearchResult>;
 }
 
-interface SearchResult {
+export interface SearchResult {
   id: string;
   username: string;
 }
