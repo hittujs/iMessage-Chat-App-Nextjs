@@ -23,3 +23,13 @@ export interface SearchResult {
   id: string;
   username: string;
 }
+
+// create conversation
+
+export interface CreateConversationInput {
+  participantIds: Array<string>;
+}
+
+export interface CreateConversationData {
+  createConversation: { conversationId: string };
+}

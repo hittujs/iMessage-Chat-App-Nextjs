@@ -1,5 +1,11 @@
-import { SearchResult, SearchUsersData, SearchUsersInput } from "@/utils/types";
-import { useLazyQuery } from "@apollo/client";
+import {
+  CreateConversationData,
+  CreateConversationInput,
+  SearchResult,
+  SearchUsersData,
+  SearchUsersInput,
+} from "@/utils/types";
+import { useLazyQuery, useMutation } from "@apollo/client";
 import {
   Button,
   Input,
@@ -16,6 +22,7 @@ import {
 import { Session } from "next-auth";
 import React, { useState } from "react";
 import UserOperations from "@/graphql/operations/user";
+import ConversationOperations from "@/graphql/operations/conversation";
 import { UserSearchList } from "./UserSearchList";
 import { Participants } from "./Participants";
 
@@ -32,15 +39,19 @@ export const ConversationModal: React.FC<Props> = ({
 }: Props) => {
   const [username, setUsername] = useState("");
   const [participant, setParticipant] = useState<Array<SearchResult>>([]);
+  const {
+    user: { id: userId },
+  } = session;
 
   const [searchUsers, { data, error, loading }] = useLazyQuery<
     SearchUsersData,
     SearchUsersInput
   >(UserOperations.Queries.searchUsers);
 
-  console.log("Here is search data", data);
-
-  console.log("Here is search error", error);
+  const [createConversation, { loading: createConversationLoading }] =
+    useMutation<CreateConversationData, CreateConversationInput>(
+      ConversationOperations.Mutations.createConversation
+    );
 
   const onSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -57,11 +68,16 @@ export const ConversationModal: React.FC<Props> = ({
   };
 
   const onCreateConversations = async () => {
+    const participantIds = [userId, ...participant.map((p) => p.id)];
     try {
-      //create conversation mutation
+      const { data } = await createConversation({
+        variables: {
+          participantIds,
+        },
+      });
+      console.log("Here is the data");
     } catch (error: any) {
       console.log("on create error", error);
-      // toast.error(error?.message);
     }
   };
 
@@ -106,9 +122,8 @@ export const ConversationModal: React.FC<Props> = ({
                   width="100%"
                   mt={6}
                   _hover={{ bg: "brand.100" }}
-                  onClick={() => {
-                    onCreateConversations();
-                  }}
+                  isLoading={createConversationLoading}
+                  onClick={onCreateConversations}
                 >
                   Create Conversation
                 </Button>
