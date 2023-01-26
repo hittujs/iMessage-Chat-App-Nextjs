@@ -3,18 +3,25 @@ import { Session } from "next-auth";
 import { ConversationModal } from "./Modal/Modal";
 import React, { useState } from "react";
 import { ConversationPopulated } from "../../../../../backend/src/util/types";
-import { ConversationItem } from "./ConverstionItem";
+import ConversationItem from "./ConverstionItem";
+import { useRouter } from "next/router";
 
 interface Props {
   session: Session;
   conversations: Array<ConversationPopulated>;
+  onViewConversation: (id: string) => void;
 }
 
 export const ConversationList: React.FC<Props> = ({
   session,
   conversations,
+  onViewConversation,
 }: Props) => {
   const [isOpen, setIsOpen] = useState(false);
+  const router = useRouter();
+  const {
+    user: { id: userId },
+  } = session;
 
   const onOpen = () => setIsOpen(true);
   const onClose = () => setIsOpen(false);
@@ -37,7 +44,12 @@ export const ConversationList: React.FC<Props> = ({
       <ConversationModal session={session} isOpen={isOpen} onClose={onClose} />
       {conversations.map((conversation) => (
         <div key={conversation.id}>
-          <ConversationItem conversation={conversation} />
+          <ConversationItem
+            conversation={conversation}
+            onClick={() => onViewConversation(conversation.id)}
+            isSelected={conversation.id === router.query.conversationId}
+            userId={userId}
+          />
         </div>
       ))}
     </Box>
