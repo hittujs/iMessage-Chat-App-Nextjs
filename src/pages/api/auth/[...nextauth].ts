@@ -12,9 +12,9 @@ export default NextAuth({
     }),
   ],
   secret: process.env.NEXTAUTH_SECRET,
-  callbacks: {
-    async session({ user, session }) {
-      return { ...session, user: { ...session.user, ...user } };
-    },
-  },
+  // callbacks: {
+  //   async session({ user, session }) {
+  //     return { ...session, user: { ...session.user, ...user } };
+  //   },
+  // },
 });

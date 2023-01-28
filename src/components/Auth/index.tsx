@@ -54,7 +54,7 @@ export const Auth: React.FC<Props> = (session, reloadSession) => {
   return (
     <Center height="100vh" border="1px solid red">
       <Stack align="center" spacing={8}>
-        {session.session?.user ? (
+        {session ? (
           <>
             <Text fontSize="3xl">Create a Username</Text>
             <Input
