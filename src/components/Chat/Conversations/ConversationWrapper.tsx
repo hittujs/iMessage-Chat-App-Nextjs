@@ -7,6 +7,7 @@ import ConversationOpearations from "@/graphql/operations/conversation";
 import { conversationsData } from "@/utils/types";
 import { ConversationPopulated } from "../../../../../backend/src/util/types";
 import { useRouter } from "next/router";
+import { SkeletonLoader } from "@/components/common/SkeletonLoader";
 
 interface Props {
   session: Session;
@@ -55,6 +56,7 @@ export const ConversationWrapper: React.FC<Props> = ({ session }: Props) => {
       },
     });
   };
+  
 
   useEffect(() => {
     subscribeToNewConversations();
@@ -66,15 +68,20 @@ export const ConversationWrapper: React.FC<Props> = ({ session }: Props) => {
       width={{ base: "100%", md: "400px" }}
       border="1px solid red"
       bg={"whiteAlpha.50"}
+      gap={4}
+      flexDirection="column"
       py={6}
       px={3}
     >
-      {/* skeletion loader  */}
-      <ConversationList
-        session={session}
-        conversations={conversationsData?.conversations || []}
-        onViewConversation={onViewConversation}
-      />
+      {conversationsLoading ? (
+        <SkeletonLoader count={8} width="360px" height="80px" />
+      ) : (
+        <ConversationList
+          session={session}
+          conversations={conversationsData?.conversations || []}
+          onViewConversation={onViewConversation}
+        />
+      )}
     </Box>
   );
 };
